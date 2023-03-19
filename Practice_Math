@@ -1,0 +1,145 @@
+RpcMathServer.java
+
+import java.util.*;
+import java.net.*;
+import java.io.*;
+class RpcMathServer{
+   DatagramSocket objDS;
+   DatagramPacket objDP;
+   String strInput, strMethodName, strResult;
+   int intVal;
+   RpcMathServer()
+   {
+	try
+	     {
+	        objDS=new DatagramSocket(1200);
+	        byte b[]=new byte[4096];
+		while(true)
+		{
+			objDP=new DatagramPacket(b, b.length);
+			objDS.receive(objDP);
+			strInput=new String(objDP.getData(), 0, objDP.getLength());
+			if(strInput.equalsIgnoreCase("q"))
+			{
+				System.exit(1);
+			}
+			else
+			{
+				StringTokenizer st = new StringTokenizer(strInput," ");
+				int i=0;
+				while(st.hasMoreTokens())
+				{
+					String token=st.nextToken();
+					strMethodName=token;
+					intVal = Integer.parseInt(st.nextToken());
+				}
+			}
+            		System.out.println(strInput);
+			InetAddress ia = InetAddress.getLocalHost();
+			if(strMethodName.equalsIgnoreCase("square"))
+			{
+				strResult="" + square(intVal);
+			}
+			else if(strMethodName.equalsIgnoreCase("squareroot"))
+			{
+				strResult="" + squareroot(intVal);
+				System.out.println(strResult);
+			}
+			else if(strMethodName.equalsIgnoreCase("cube"))
+			{
+				strResult="" + cube(intVal);
+			}
+			else if(strMethodName.equalsIgnoreCase("cuberoot"))
+			{
+				strResult="" + cuberoot(intVal);
+			}
+			byte b1[] = strResult.getBytes();
+			DatagramSocket objDS1 = new DatagramSocket();
+			DatagramPacket objDP1 = new DatagramPacket(b1, b1.length, InetAddress.getLocalHost(), 1300);
+			System.out.println("Result : " +strResult+ "\n");
+			objDS1.send(objDP1);
+		}
+             }
+             catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+        public double square(int a) throws Exception
+	{
+		double ans;
+		ans = a*a;
+		return ans;
+		
+	}
+	public double squareroot(int a) throws Exception
+	{
+	   	double ans;
+		ans = Math.sqrt(a);
+		return ans;
+	}
+	public double cube(int a) throws Exception
+	{
+	   	double ans;
+		ans = a*a*a;
+		return ans;
+	}
+	public double cuberoot(int a) throws Exception
+	{
+	   	double ans;
+		ans = Math.cbrt(a);
+		return ans;
+	}
+	public static void main(String[] args)
+	{
+		new RpcMathServer();
+ 	}
+}
+
+
+RpcMathClient.java
+
+import java.io.*;
+import java.net.*;
+class RpcMathClient
+      {
+	 RpcMathClient()
+	   {
+		try
+		   {
+                        InetAddress objlA = InetAddress.getLocalHost();
+		      	DatagramSocket objDS = new DatagramSocket();
+			DatagramSocket objDS1 = new DatagramSocket(1300);
+			System.out.println("\nRPC Client\n");
+			System.out.println("1.Square of the number - square\n");
+			System.out.println("2.Square root of the number - squareroot\n");
+			System.out.println("3.Cube of the number - cube\n");
+			System.out.println("4.Cube root of the number - cuberoot\n");
+			System.out.println("Enter method name and number \n");
+						
+
+			while(true)
+			{
+				BufferedReader objBr = new BufferedReader(new InputStreamReader(System.in));
+				String strInput = objBr.readLine();
+				byte b[] = strInput.getBytes();
+				DatagramPacket objDP = new DatagramPacket(b, b.length, objlA, 1200);
+				objDS.send(objDP);
+				objDP = new DatagramPacket(b, b.length);
+				objDS1.receive(objDP);
+				String s = new String(objDP.getData(), 0 ,objDP.getLength());
+				System.out.println("\nResult = " +s + "\n");
+			}
+		    }
+		catch (Exception e)
+		   {
+			e.printStackTrace();
+		   }
+            }
+       public static void main(String[] args)
+        {
+		new RpcMathClient();
+        }
+}
+
+
