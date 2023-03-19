@@ -1,0 +1,109 @@
+rpcFibonacciServer.java
+
+import java.util.*; 
+import java.net.*; 
+import java.io.*; 
+class rpcFibonacciServer 
+{ 
+DatagramSocket objDS; 
+DatagramPacket objDP; 
+String strInput, strMethodName, strResult; 
+int intVal; 
+int i; 
+rpcFibonacciServer() 
+{ 
+try 
+{ 
+objDS=new DatagramSocket(1200); 
+byte b[]=new byte[4096]; 
+while(true) 
+{ 
+objDP=new DatagramPacket(b, b.length); 
+objDS.receive(objDP); 
+strInput=new String(objDP.getData(), 0, objDP.getLength()); if(strInput.equalsIgnoreCase("q")) 
+{ 
+System.exit(1); 
+} 
+else 
+{ 
+StringTokenizer st = new StringTokenizer(strInput," "); int i=0; 
+while(st.hasMoreTokens()) 
+{ 
+String token=st.nextToken(); 
+strMethodName=token; 
+intVal = Integer.parseInt(st.nextToken()); 
+} 
+} 
+System.out.println(strInput); 
+InetAddress ia = InetAddress.getLocalHost(); 
+if(strMethodName.equalsIgnoreCase("fibonacci")) {
+strResult= "" + fibonacci(intVal); 
+} 
+else 
+{ 
+System.out.println("Invalid !"); 
+} 
+byte b1[]=strResult.getBytes(); 
+DatagramSocket objDS1 = new DatagramSocket(); DatagramPacket objDP1 = new DatagramPacket(b1, b1.length, InetAddress.getLocalHost(), 1300); 
+objDS1.send(objDP1); 
+} 
+} 
+catch (Exception e) 
+{ 
+e.printStackTrace(); 
+} 
+} 
+public double fibonacci(int a) throws Exception 
+{ 
+int t1 = 0, t2 = 1; 
+ System.out.println("First " + a + " terms: "); 
+ for (int i = 1; i <= a; ++i) 
+ { 
+ System.out.print(t1 + " "); 
+ int sum = t1 + t2; 
+ t1 = t2; 
+ t2 = sum; 
+ } 
+return 0; 
+} 
+public static void main(String[] args) 
+{ 
+new rpcFibonacciServer(); 
+} 
+} 
+
+rpcFibonacciClient.java
+
+import java.io.*;
+import java.net.*; 
+class rpcFibonacciClient 
+{ 
+rpcFibonacciClient() 
+{ 
+try 
+{ 
+InetAddress objIA = InetAddress.getLocalHost(); 
+DatagramSocket objDS = new DatagramSocket(); 
+DatagramSocket objDS1 = new DatagramSocket(1300); System.out.println("\nRPC Client\n"); 
+System.out.println("1. Fibonacci of the number - fibonacci\n"); System.out.println("Enter method name and the number\n"); while (true) 
+{ 
+BufferedReader objBR = new BufferedReader(new 
+InputStreamReader(System.in)); 
+String strInput = objBR.readLine(); 
+byte b[] = strInput.getBytes(); 
+DatagramPacket objDP = new DatagramPacket(b, b.length, objIA, 1200); objDS.send(objDP); 
+objDP = new DatagramPacket(b, b.length); 
+objDS1.receive(objDP); 
+String strOutput = new String(objDP.getData(), 0, objDP.getLength()); System.out.println("Output is at server side."); 
+} 
+} 
+catch (Exception e) 
+{ 
+e.printStackTrace(); 
+} 
+} 
+public static void main(String[] args) 
+{ 
+new rpcFibonacciClient();  
+} } 
+
